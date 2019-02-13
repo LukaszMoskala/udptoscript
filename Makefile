@@ -25,3 +25,13 @@ udptoscript.o: udptoscript.cpp
 	$(CXX) $(CXXFLAGS) -c -o udptoscript.o udptoscript.cpp
 udptoscript: udptoscript.o
 	$(CXX) $(CXXFLAGS) -o udptoscript udptoscript.o
+
+install: udptoscript
+	install -m 775 udptoscript $(PREFIX)/bin/
+	@echo use make install-service to install systemd service
+install-service:
+	install -m 664 udptoscript.service /etc/systemd/system/
+	@echo ===========================================================
+	@echo = YOU SHOULD EDIT /etc/systemd/system/udptoscript.service =
+	@echo =       AND CHANGE USER AS WHICH DAEMON IS RUNNING        =
+	@echo ===========================================================

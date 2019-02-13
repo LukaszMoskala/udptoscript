@@ -1,0 +1,16 @@
+[Unit]
+Description=UDP to Script daemon
+After=network.target
+
+[Service]
+Type=simple
+
+#You should change user and WorkingDirectory here
+#for security reasons
+User=root
+WorkingDirectory=/root
+
+ExecStart=/usr/local/bin/udptoscript
+
+[Install]
+WantedBy=multi-user.target
