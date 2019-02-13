@@ -29,8 +29,12 @@ using namespace std;
 //   - change port
 //   - change stop command or disable it
 //   - IP-based restriction
+//     - global (in config file)
+//     - per script (comments in scripts)
 //   - script directory location
-//MAKE CODE MORE READABLE!!!!!
+//   - rules for sending script output back
+//     - Never/Always/On success/On failure/Send only return code
+// - MAKE CODE MORE READABLE!!!!!
 
 //from https://stackoverflow.com/questions/12774207/fastest-way-to-check-if-a-file-exist-using-standard-c-c11-c
 bool file_existence_tester (const std::string& name) {
