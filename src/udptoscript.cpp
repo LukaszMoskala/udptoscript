@@ -61,29 +61,29 @@ sf::UdpSocket socket;
 //from https://stackoverflow.com/questions/6168636/how-to-trigger-sigusr1-and-sigusr2
 void my_signal_handler(int signum)
 {
-    if (signum == SIGUSR1)
+  if (signum == SIGUSR1)
     {
-        cout<<"received SIGUSR1, reloading config"<<endl;
-        destroyconfig(config);
-        if(loadconfig(config)) {
-          socket.unbind();
-          exit(1);
-        }
-        if(verifyconfig(config)) {
-          socket.unbind();
-          exit(1);
-        }
-    }
-    if(signum == SIGTERM) {
-      cout<<"received SIGTERM, exiting gracefully"<<endl;
+    cout<<"received SIGUSR1, reloading config"<<endl;
+    destroyconfig(config);
+    if(loadconfig(config)) {
       socket.unbind();
-      exit(0);
+      exit(1);
     }
-    if(signum == SIGINT) {
-      cout<<"received SIGTERM, exiting gracefully"<<endl;
+    if(verifyconfig(config)) {
       socket.unbind();
-      exit(0);
+      exit(1);
     }
+  }
+  if(signum == SIGTERM) {
+    cout<<"received SIGTERM, exiting gracefully"<<endl;
+    socket.unbind();
+    exit(0);
+  }
+  if(signum == SIGINT) {
+    cout<<"received SIGTERM, exiting gracefully"<<endl;
+    socket.unbind();
+    exit(0);
+  }
 }
 int main() {
 
