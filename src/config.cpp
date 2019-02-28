@@ -27,27 +27,40 @@ int loadconfig(config_t &config) {
     string currentline;
     getline(configfile, currentline);
     if(currentline.length() == 0 || currentline[0] == '#' || currentline[0] == ' ' || currentline[0] == '\t')
-    continue;
+      continue;
     int spacepos=currentline.find(" ");
     if(spacepos == -1)
-    continue;
+      continue;
     string param=currentline.substr(0, spacepos);
     string val=currentline.substr(spacepos+1);
+    #ifdef DEBUG_CONFIG_LOADER
     cout<<"Config: "<<param<<"="<<val<<endl;
+    #endif
+    if(param == "pidfile")
+      config.pidfile = val;
     if(param == "port")
-    config.port = atoi( val.c_str() );
+      config.port = atoi( val.c_str() );
+    if(param == "listenip")
+      config.listenIP = val;
     if(param == "allow")
-    config.globalAllowedIPS.push_back(val);
+      config.globalAllowedIPS.push_back(val);
     if(param == "stopcommand")
-    config.stopcommand = val;
+      config.stopcommand = val;
     if(param == "scriptsDir")
-    config.scriptsDir = val;
+      config.scriptsDir = val;
     if(param == "outputsendrules") {
       if(val == "always")
         config.OutputSendRules = always;
       if(val == "never")
         config.OutputSendRules = never;
     }
+    if(param == "senderrormessages") {
+      if(val == "always")
+        config.errorMessages = always;
+      if(val == "never")
+        config.errorMessages = never;
+    }
+
   }
   configfile.close();
   return 0; //no errors
@@ -62,6 +75,7 @@ int verifyconfig(config_t &config) {
   }
   if( config.scriptsDir[ config.scriptsDir.length() - 1 ] == '/' ) {
     config.scriptsDir = config.scriptsDir.substr(0, config.scriptsDir.length() - 1 ); //strip / from end of path
+    cout<<"WARINING: stripped / from end of scriptsDir path! avoid that next time"<<endl;
   }
   if(config.globalAllowedIPS.size() == 0) {
     cout<<"Warning: no allowed IPs specified, nobody will be able to connect!"<<endl;
@@ -81,6 +95,10 @@ int verifyconfig(config_t &config) {
     config.stopcommand = "stopdaemon";
     cout<<"WARNING: no stopcommand directive in config, using 'stopdaemon'"<<endl;
   }
+  if(config.listenIP == "") {
+    config.listenIP = "0.0.0.0";
+    cout<<"WARNING: listenIP was empty, so I changed it to 0.0.0.0"<<endl;
+  }
   return 0; //no errors
 }
 void destroyconfig(config_t &config) {
@@ -88,5 +106,8 @@ void destroyconfig(config_t &config) {
   config.stopcommand="";
   config.scriptsDir="";
   config.OutputSendRules=never;
+  config.errorMessages=never;
+  config.listenIP="0.0.0.0";
+  config.pidfile="";
   config.globalAllowedIPS.clear();
 }

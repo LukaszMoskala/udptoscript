@@ -30,6 +30,9 @@ struct config_t {
   string stopcommand;
   string scriptsDir;
   OutputSendRules_t OutputSendRules;
+  OutputSendRules_t errorMessages;
+  string listenIP;
+  string pidfile;
 };
 
 int loadconfig(config_t &config);

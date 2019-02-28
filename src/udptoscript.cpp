@@ -27,24 +27,14 @@ char buffer[1024];
 //Udp server instance
 UdpServer udp;
 
-//from https://stackoverflow.com/questions/12774207/fastest-way-to-check-if-a-file-exist-using-standard-c-c11-c
-bool file_existence_tester (const std::string& name) {
-  struct stat buffer;
-  return (stat (name.c_str(), &buffer) == 0);
-}
+//checks if file exists
+bool file_existence_tester (const std::string& name);
+//executes command and captures STDOUT
+void execToBuf(string command, char* buf, int buflen);
 
-//from https://stackoverflow.com/questions/125828/capturing-stdout-from-a-system-command-optimally
-void execToBuf(string command, char* buf, int buflen) {
-  FILE* file=popen(command.c_str(),"r");
-  if(!file) {
-    return;
-  }
-  //fgets(buf,buflen,file);
-  //fread can read more than 1 line
-  fread(buf,buflen,1,file);
-  pclose(file);
-}
-
+//config.pidfile may change at runtime, so we have to save these settings somewhere
+bool haveICreatedPidFile=false;
+string createdPidFileName="";
 //from https://stackoverflow.com/questions/6168636/how-to-trigger-sigusr1-and-sigusr2
 void my_signal_handler(int signum)
 {
@@ -55,23 +45,31 @@ void my_signal_handler(int signum)
     if(loadconfig(config)) {
       //exit if we failed to load config
       udp.cleanup();
+      if(haveICreatedPidFile)
+        unlink(createdPidFileName.c_str());
       exit(1);
     }
     if(verifyconfig(config)) {
       //config is invalid, exit
       udp.cleanup();
+      if(haveICreatedPidFile)
+        unlink(createdPidFileName.c_str());
       exit(1);
     }
   }
   if(signum == SIGTERM) {
     cout<<"received SIGTERM, exiting gracefully"<<endl;
     udp.cleanup();
+    if(haveICreatedPidFile)
+      unlink(createdPidFileName.c_str());
     exit(0);
   }
   //^C sends SIGINT
   if(signum == SIGINT) {
     cout<<"received SIGINT, exiting gracefully"<<endl;
     udp.cleanup();
+    if(haveICreatedPidFile)
+      unlink(createdPidFileName.c_str());
     exit(0);
   }
 }
@@ -91,11 +89,34 @@ int main() {
   signal(SIGTERM, my_signal_handler);
   signal(SIGINT, my_signal_handler);
 
+  //write pidfile
+  if(config.pidfile != "") {
+    if(file_existence_tester(config.pidfile)) {
+      //pidfile exists, read it and check if process is running
+      cout<<"ERROR: pidfile "<<config.pidfile<<" exists!"<<endl;
+      cout<<"If you are sure that process that created it is not running, delete it"<<endl;
+      return 1;
+    }
+    else {
+      ofstream pidfile;
+      pidfile.open(config.pidfile.c_str());
+      if(!pidfile.is_open()) {
+        cout<<"WARNING: Failed to write pidfile "<<config.pidfile<<endl;
+      }
+      else {
+        pidfile<<getpid();
+        pidfile.close();
+        haveICreatedPidFile=true;
+        //because config.pidfile can be changed at runtime
+        createdPidFileName=config.pidfile;
+      }
+    }
+  }
   //Initialize network connectivity
-  //this function takes only port number as argument
+  //this function takes only port number and ip to listen at as argument
   //in case of failure, it generates error message to stdout
   //and returns non-zero exit code
-  if(udp.begin(config.port))
+  if(udp.begin(config.port, config.listenIP))
     return 1;
 
   //infinite loop that handles server
@@ -125,7 +146,9 @@ int main() {
     }
     if(!allowed) {
       //if we'r here, IP is not allowed
-      //todo: send error message to client?
+      if(config.errorMessages == always) {
+        udp.respond("Your IP is not white-listed on this server.");
+      }
       cout<<"IP "<<udp.getClientIP()<<" not in allowed list"<<endl;
       continue;
     }
@@ -141,13 +164,16 @@ int main() {
     }
 
     if(!possiblygood) {
-      //todo: send error message to client?
+      if(config.errorMessages == always) {
+        udp.respond("Messages can only contain numbers, letters and dot.");
+      }
       cout<<"Data contains invalid characters"<<endl;
       continue;
     }
     string s=string(buffer, received);
     if(s == config.stopcommand) {
-      //todo: notifiy client about success?
+
+      udp.respond("Exiting now.");
       cout<<"Received stop command, exiting now"<<endl;
       break;
     }
@@ -168,7 +194,9 @@ int main() {
         udp.respond(buffer, strlen(buffer));
     }
     else {
-      //todo: send error message to client?
+      if(config.errorMessages == always) {
+        udp.respond("Script does not exist.");
+      }
       cout<<"Error: file does not exist!"<<endl;
     }
     cout<<"EXECUTION COMPLETED"<<endl;
@@ -176,4 +204,22 @@ int main() {
 
   }
   udp.cleanup();
+  if(haveICreatedPidFile)
+    unlink(createdPidFileName.c_str());
+}
+//from https://stackoverflow.com/questions/12774207/fastest-way-to-check-if-a-file-exist-using-standard-c-c11-c
+bool file_existence_tester (const std::string& name) {
+  struct stat buffer;
+  return (stat (name.c_str(), &buffer) == 0);
+}
+//from https://stackoverflow.com/questions/125828/capturing-stdout-from-a-system-command-optimally
+void execToBuf(string command, char* buf, int buflen) {
+  FILE* file=popen(command.c_str(),"r");
+  if(!file) {
+    return;
+  }
+  //fgets(buf,buflen,file);
+  //fread can read more than 1 line
+  fread(buf,buflen,1,file);
+  pclose(file);
 }
