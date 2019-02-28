@@ -19,7 +19,10 @@ CXXFLAGS=-O3 --std=c++17
 CFLAGS=-O3
 PREFIX=/usr/local
 
-all: udptoscript
+all: md udptoscript
+
+md:
+	mkdir -p bin obj
 
 obj/network.o: src/network.cpp src/network.hpp
 	$(CXX) $(CXXFLAGS) -c -o obj/network.o src/network.cpp
