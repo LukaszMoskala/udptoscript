@@ -93,7 +93,9 @@ int main() {
   signal(SIGUSR1, my_signal_handler);
   signal(SIGTERM, my_signal_handler);
   signal(SIGINT, my_signal_handler);
-  socket.bind(config.port);
+  //SFML should print error message on it's own
+  if(socket.bind(config.port) != sf::Socket::Done)
+    return 1;
 
   char buffer[1024];
   std::size_t received = 0;
