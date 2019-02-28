@@ -149,6 +149,7 @@ int main() {
     }
     if(!allowed) {
       cout<<"IP "<<sender.toString()<<" not in allowed list"<<endl;
+      continue;
     }
     bool possiblygood=true;
 
