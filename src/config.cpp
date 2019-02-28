@@ -27,23 +27,23 @@ int loadconfig(config_t &config) {
     string currentline;
     getline(configfile, currentline);
     if(currentline.length() == 0 || currentline[0] == '#' || currentline[0] == ' ' || currentline[0] == '\t')
-    continue;
+      continue;
     int spacepos=currentline.find(" ");
     if(spacepos == -1)
-    continue;
+      continue;
     string param=currentline.substr(0, spacepos);
     string val=currentline.substr(spacepos+1);
     #ifdef DEBUG_CONFIG_LOADER
     cout<<"Config: "<<param<<"="<<val<<endl;
     #endif
     if(param == "port")
-    config.port = atoi( val.c_str() );
+      config.port = atoi( val.c_str() );
     if(param == "allow")
-    config.globalAllowedIPS.push_back(val);
+      config.globalAllowedIPS.push_back(val);
     if(param == "stopcommand")
-    config.stopcommand = val;
+      config.stopcommand = val;
     if(param == "scriptsDir")
-    config.scriptsDir = val;
+      config.scriptsDir = val;
     if(param == "outputsendrules") {
       if(val == "always")
         config.OutputSendRules = always;
