@@ -14,13 +14,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
-//Most of network code is copied from SFML website:
-// https://www.sfml-dev.org/documentation/2.5.1/classsf_1_1UdpSocket.php
 #include "config.hpp"
-
-
-#include <SFML/Network.hpp>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <cstring>
