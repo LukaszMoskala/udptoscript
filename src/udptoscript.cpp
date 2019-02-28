@@ -44,7 +44,9 @@ void execToBuf(string command, char* buf, int buflen) {
   fread(buf,buflen,1,file);
   pclose(file);
 }
-
+//config.pidfile may change at runtime, so we have to save these settings somewhere
+bool haveICreatedPidFile=false;
+string createdPidFileName="";
 //from https://stackoverflow.com/questions/6168636/how-to-trigger-sigusr1-and-sigusr2
 void my_signal_handler(int signum)
 {
@@ -55,23 +57,31 @@ void my_signal_handler(int signum)
     if(loadconfig(config)) {
       //exit if we failed to load config
       udp.cleanup();
+      if(haveICreatedPidFile)
+        unlink(createdPidFileName.c_str());
       exit(1);
     }
     if(verifyconfig(config)) {
       //config is invalid, exit
       udp.cleanup();
+      if(haveICreatedPidFile)
+        unlink(createdPidFileName.c_str());
       exit(1);
     }
   }
   if(signum == SIGTERM) {
     cout<<"received SIGTERM, exiting gracefully"<<endl;
     udp.cleanup();
+    if(haveICreatedPidFile)
+      unlink(createdPidFileName.c_str());
     exit(0);
   }
   //^C sends SIGINT
   if(signum == SIGINT) {
     cout<<"received SIGINT, exiting gracefully"<<endl;
     udp.cleanup();
+    if(haveICreatedPidFile)
+      unlink(createdPidFileName.c_str());
     exit(0);
   }
 }
@@ -91,6 +101,29 @@ int main() {
   signal(SIGTERM, my_signal_handler);
   signal(SIGINT, my_signal_handler);
 
+  //write pidfile
+  if(config.pidfile != "") {
+    if(file_existence_tester(config.pidfile)) {
+      //pidfile exists, read it and check if process is running
+      cout<<"ERROR: pidfile "<<config.pidfile<<" exists!"<<endl;
+      cout<<"If you are sure that process that created it is not running, delete it"<<endl;
+      return 1;
+    }
+    else {
+      ofstream pidfile;
+      pidfile.open(config.pidfile.c_str());
+      if(!pidfile.is_open()) {
+        cout<<"WARNING: Failed to write pidfile "<<config.pidfile<<endl;
+      }
+      else {
+        pidfile<<getpid();
+        pidfile.close();
+        haveICreatedPidFile=true;
+        //because config.pidfile can be changed at runtime
+        createdPidFileName=config.pidfile;
+      }
+    }
+  }
   //Initialize network connectivity
   //this function takes only port number and ip to listen at as argument
   //in case of failure, it generates error message to stdout
@@ -183,4 +216,6 @@ int main() {
 
   }
   udp.cleanup();
+  if(haveICreatedPidFile)
+    unlink(createdPidFileName.c_str());
 }

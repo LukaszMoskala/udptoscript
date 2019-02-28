@@ -36,6 +36,8 @@ int loadconfig(config_t &config) {
     #ifdef DEBUG_CONFIG_LOADER
     cout<<"Config: "<<param<<"="<<val<<endl;
     #endif
+    if(param == "pidfile")
+      config.pidfile = val;
     if(param == "port")
       config.port = atoi( val.c_str() );
     if(param == "listenip")
@@ -106,5 +108,6 @@ void destroyconfig(config_t &config) {
   config.OutputSendRules=never;
   config.errorMessages=never;
   config.listenIP="0.0.0.0";
+  config.pidfile="";
   config.globalAllowedIPS.clear();
 }
