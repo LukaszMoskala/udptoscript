@@ -79,7 +79,7 @@ int verifyconfig(config_t &config) {
   }
   if(config.stopcommand == "") {
     config.stopcommand = "stopdaemon";
-    cout<<"WARNING: no stopcommand directive in config, using stopdaemon"<<endl;
+    cout<<"WARNING: no stopcommand directive in config, using 'stopdaemon'"<<endl;
   }
   return 0; //no errors
 }
