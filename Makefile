@@ -21,13 +21,13 @@ PREFIX=/usr/local
 
 all: udptoscript
 
-udptoscript.o: src/udptoscript.cpp
+obj/udptoscript.o: src/udptoscript.cpp
 	$(CXX) $(CXXFLAGS) -c -o obj/udptoscript.o src/udptoscript.cpp
 
-config.o: src/config.cpp
+obj/config.o: src/config.cpp
 	$(CXX) $(CXXFLAGS) -c -o obj/config.o src/config.cpp
 
-udptoscript: udptoscript.o config.o
+udptoscript: obj/udptoscript.o obj/config.o
 	$(CXX) $(CXXFLAGS) -o bin/udptoscript obj/udptoscript.o obj/config.o
 
 install: udptoscript
