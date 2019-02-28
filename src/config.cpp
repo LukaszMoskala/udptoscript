@@ -66,3 +66,10 @@ int verifyconfig(config_t &config) {
   }
   return 0; //no errors
 }
+void destroyconfig(config_t &config) {
+  config.port=0;
+  config.stopcommand="";
+  config.scriptsDir="";
+  config.OutputSendRules=never;
+  config.globalAllowedIPS.clear();
+}

@@ -18,5 +18,5 @@ struct config_t {
 
 int loadconfig(config_t &config);
 int verifyconfig(config_t &config);
-
+void destroyconfig(config_t &config);
 #endif

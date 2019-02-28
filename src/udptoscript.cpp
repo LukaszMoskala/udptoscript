@@ -64,6 +64,7 @@ void my_signal_handler(int signum)
     if (signum == SIGUSR1)
     {
         cout<<"received SIGUSR1, reloading config"<<endl;
+        destroyconfig(config);
         if(loadconfig(config)) {
           socket.unbind();
           exit(1);
