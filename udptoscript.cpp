@@ -142,7 +142,7 @@ int main() {
   unsigned short port;
   string s="";
 
-  while( s != config.stopcommand ) {
+  while( 1 ) {
     socket.receive(buffer, sizeof(buffer), received, sender, port);
     cout<<"Received "<<received<<" from "<<sender.toString()<<":"<<port<<endl;
     bool allowed=false;
@@ -166,6 +166,10 @@ int main() {
       continue;
     cout<<"Data is valid, continue"<<endl;
     s=string(buffer, received);
+    if(s == config.stopcommand) {
+      cout<<"Received stop command, exiting now"<<endl;
+      break;
+    }
 
     s=config.scriptsDir+"/"+s;
     cout<<s<<endl;
