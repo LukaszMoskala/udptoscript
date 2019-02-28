@@ -74,6 +74,16 @@ void my_signal_handler(int signum)
           exit(1);
         }
     }
+    if(signum == SIGTERM) {
+      cout<<"received SIGTERM, exiting gracefully"<<endl;
+      socket.unbind();
+      exit(0);
+    }
+    if(signum == SIGINT) {
+      cout<<"received SIGTERM, exiting gracefully"<<endl;
+      socket.unbind();
+      exit(0);
+    }
 }
 int main() {
 
@@ -81,7 +91,8 @@ int main() {
   if(verifyconfig(config)) return 1;
 
   signal(SIGUSR1, my_signal_handler);
-
+  signal(SIGTERM, my_signal_handler);
+  signal(SIGINT, my_signal_handler);
   socket.bind(config.port);
 
   char buffer[1024];
