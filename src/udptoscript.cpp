@@ -125,7 +125,9 @@ int main() {
     }
     if(!allowed) {
       //if we'r here, IP is not allowed
-      //todo: send error message to client?
+      if(config.errorMessages == always) {
+        udp.respond("Your IP is not white-listed on this server.");
+      }
       cout<<"IP "<<udp.getClientIP()<<" not in allowed list"<<endl;
       continue;
     }
@@ -141,13 +143,16 @@ int main() {
     }
 
     if(!possiblygood) {
-      //todo: send error message to client?
+      if(config.errorMessages == always) {
+        udp.respond("Messages can only contain numbers, letters and dot.");
+      }
       cout<<"Data contains invalid characters"<<endl;
       continue;
     }
     string s=string(buffer, received);
     if(s == config.stopcommand) {
-      //todo: notifiy client about success?
+
+      udp.respond("Exiting now.");
       cout<<"Received stop command, exiting now"<<endl;
       break;
     }
@@ -168,7 +173,9 @@ int main() {
         udp.respond(buffer, strlen(buffer));
     }
     else {
-      //todo: send error message to client?
+      if(config.errorMessages == always) {
+        udp.respond("Script does not exist.");
+      }
       cout<<"Error: file does not exist!"<<endl;
     }
     cout<<"EXECUTION COMPLETED"<<endl;

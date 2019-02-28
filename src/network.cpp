@@ -38,3 +38,8 @@ void UdpServer::cleanup() {
 const char* UdpServer::getClientIP() {
   return inet_ntoa(this->client.sin_addr);
 }
+void UdpServer::respond(const char* s) {
+  if(sendto(this->sockfd, s, strlen(s), 0, (struct sockaddr *)&this->client,this->l)) {
+    cout<<"sendto() failed: "<<strerror(errno)<<endl;
+  }
+}

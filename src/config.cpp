@@ -48,6 +48,13 @@ int loadconfig(config_t &config) {
       if(val == "never")
         config.OutputSendRules = never;
     }
+    if(param == "senderrormessages") {
+      if(val == "always")
+        config.errorMessages = always;
+      if(val == "never")
+        config.errorMessages = never;
+    }
+
   }
   configfile.close();
   return 0; //no errors
@@ -88,5 +95,6 @@ void destroyconfig(config_t &config) {
   config.stopcommand="";
   config.scriptsDir="";
   config.OutputSendRules=never;
+  config.errorMessages=never;
   config.globalAllowedIPS.clear();
 }
