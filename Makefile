@@ -15,20 +15,23 @@
 
 CC=gcc
 CXX=g++
-CXXFLAGS=-O3 --std=c++17 -lsfml-network
+CXXFLAGS=-O3 --std=c++17
 CFLAGS=-O3
 PREFIX=/usr/local
 
 all: udptoscript
 
+obj/network.o: src/network.cpp src/network.hpp
+	$(CXX) $(CXXFLAGS) -c -o obj/network.o src/network.cpp
+
 obj/udptoscript.o: src/udptoscript.cpp
 	$(CXX) $(CXXFLAGS) -c -o obj/udptoscript.o src/udptoscript.cpp
 
-obj/config.o: src/config.cpp
+obj/config.o: src/config.cpp src/config.hpp
 	$(CXX) $(CXXFLAGS) -c -o obj/config.o src/config.cpp
 
-udptoscript: obj/udptoscript.o obj/config.o
-	$(CXX) $(CXXFLAGS) -o bin/udptoscript obj/udptoscript.o obj/config.o
+udptoscript: obj/udptoscript.o obj/config.o obj/network.o src/config.hpp src/network.hpp
+	$(CXX) $(CXXFLAGS) -o bin/udptoscript obj/udptoscript.o obj/config.o obj/network.o
 
 install: udptoscript
 	install -m 775 bin/udptoscript $(PREFIX)/bin/

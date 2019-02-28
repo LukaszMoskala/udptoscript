@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "config.hpp"
+#include "network.hpp"
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <cstring>
@@ -50,7 +51,7 @@ void execToBuf(string command, char* buf, int buflen) {
   fread(buf,buflen,1,file);
   pclose(file);
 }
-sf::UdpSocket socket;
+UdpServer udp;
 
 //from https://stackoverflow.com/questions/6168636/how-to-trigger-sigusr1-and-sigusr2
 void my_signal_handler(int signum)
@@ -61,24 +62,24 @@ void my_signal_handler(int signum)
     destroyconfig(config);
     if(loadconfig(config)) {
       //exit if we failed to load config
-      socket.unbind();
+      udp.cleanup();
       exit(1);
     }
     if(verifyconfig(config)) {
       //config is invalid, exit
-      socket.unbind();
+      udp.cleanup();
       exit(1);
     }
   }
   if(signum == SIGTERM) {
     cout<<"received SIGTERM, exiting gracefully"<<endl;
-    socket.unbind();
+    udp.cleanup();
     exit(0);
   }
   //^C sends SIGINT
   if(signum == SIGINT) {
     cout<<"received SIGINT, exiting gracefully"<<endl;
-    socket.unbind();
+    udp.cleanup();
     exit(0);
   }
 }
@@ -90,25 +91,25 @@ int main() {
   signal(SIGUSR1, my_signal_handler);
   signal(SIGTERM, my_signal_handler);
   signal(SIGINT, my_signal_handler);
-  //SFML should print error message on it's own
-  if(socket.bind(config.port) != sf::Socket::Done)
+  if(udp.begin(config.port))
     return 1;
-
+  cout<<"Networking ready"<<endl;
   char buffer[1024];
-  std::size_t received = 0;
-  sf::IpAddress sender;
-  unsigned short port;
+  int received = 0;
   string s="";
 
   while( 1 ) {
-    socket.receive(buffer, sizeof(buffer), received, sender, port);
+    //socket.receive(buffer, sizeof(buffer), received, sender, port);
     //cout<<"Received "<<received<<" from "<<sender.toString()<<":"<<port<<endl;
+    received=udp.read(buffer, sizeof(buffer));
+    if(received < 1)
+      continue;
     bool allowed=false;
     for(int i=0;i<config.globalAllowedIPS.size() && !allowed;i++) {
-      allowed= ( config.globalAllowedIPS[i] == sender.toString() );
+      allowed= ( config.globalAllowedIPS[i] == udp.getClientIP() );
     }
     if(!allowed) {
-      cout<<"IP "<<sender.toString()<<" not in allowed list"<<endl;
+      cout<<"IP "<<udp.getClientIP()<<" not in allowed list"<<endl;
       continue;
     }
     bool possiblygood=true;
@@ -137,7 +138,7 @@ int main() {
       memset(buffer,0,sizeof(buffer));
       execToBuf(s,buffer,sizeof(buffer)-1);
       if(config.OutputSendRules == always)
-        socket.send(buffer,strlen(buffer),sender,port);
+        udp.respond(buffer, strlen(buffer));
     }
     else {
       cout<<"Error: file does not exist!"<<endl;
@@ -146,5 +147,5 @@ int main() {
 
 
   }
-  socket.unbind();
+  udp.cleanup();
 }
