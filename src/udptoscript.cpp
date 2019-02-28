@@ -22,6 +22,10 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <signal.h>
 config_t config;
 
+//Input and output buffer
+char buffer[1024];
+
+
 //TODO:
 // - configuration file
 //   - change port                                                 | DONE
@@ -91,16 +95,13 @@ int main() {
   signal(SIGUSR1, my_signal_handler);
   signal(SIGTERM, my_signal_handler);
   signal(SIGINT, my_signal_handler);
+  //library itself generates error messages
   if(udp.begin(config.port))
     return 1;
-  char buffer[1024];
-  int received = 0;
-  string s="";
 
   while( 1 ) {
-    //socket.receive(buffer, sizeof(buffer), received, sender, port);
-    //cout<<"Received "<<received<<" from "<<sender.toString()<<":"<<port<<endl;
-    received=udp.read(buffer, sizeof(buffer));
+    memset(buffer, 0, sizeof(buffer));
+    int received=udp.read(buffer, sizeof(buffer));
     if(received < 1)
       continue;
     bool allowed=false;
@@ -124,8 +125,7 @@ int main() {
       cout<<"Data contains invalid characters"<<endl;
       continue;
     }
-    //cout<<"Data is valid, continue"<<endl;
-    s=string(buffer, received);
+    string s=string(buffer, received);
     if(s == config.stopcommand) {
       cout<<"Received stop command, exiting now"<<endl;
       break;
