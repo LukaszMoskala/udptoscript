@@ -66,10 +66,12 @@ void my_signal_handler(int signum)
     cout<<"received SIGUSR1, reloading config"<<endl;
     destroyconfig(config);
     if(loadconfig(config)) {
+      //exit if we failed to load config
       socket.unbind();
       exit(1);
     }
     if(verifyconfig(config)) {
+      //config is invalid, exit
       socket.unbind();
       exit(1);
     }
@@ -79,6 +81,7 @@ void my_signal_handler(int signum)
     socket.unbind();
     exit(0);
   }
+  //^C sends SIGINT
   if(signum == SIGINT) {
     cout<<"received SIGINT, exiting gracefully"<<endl;
     socket.unbind();
