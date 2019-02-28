@@ -21,16 +21,16 @@ PREFIX=/usr/local
 
 all: udptoscript
 
-udptoscript.o: udptoscript.cpp
-	$(CXX) $(CXXFLAGS) -c -o udptoscript.o udptoscript.cpp
+udptoscript.o: src/udptoscript.cpp
+	$(CXX) $(CXXFLAGS) -c -o obj/udptoscript.o src/udptoscript.cpp
 udptoscript: udptoscript.o
-	$(CXX) $(CXXFLAGS) -o udptoscript udptoscript.o
+	$(CXX) $(CXXFLAGS) -o bin/udptoscript obj/udptoscript.o
 
 install: udptoscript
-	install -m 775 udptoscript $(PREFIX)/bin/
+	install -m 775 bin/udptoscript $(PREFIX)/bin/
 	@echo use make install-service to install systemd service
 install-service:
-	install -m 664 udptoscript.service /etc/systemd/system/
+	install -m 664 src/udptoscript.service /etc/systemd/system/
 	@echo ===========================================================
 	@echo = YOU SHOULD EDIT /etc/systemd/system/udptoscript.service =
 	@echo =       AND CHANGE USER AS WHICH DAEMON IS RUNNING        =
