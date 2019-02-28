@@ -27,23 +27,11 @@ char buffer[1024];
 //Udp server instance
 UdpServer udp;
 
-//from https://stackoverflow.com/questions/12774207/fastest-way-to-check-if-a-file-exist-using-standard-c-c11-c
-bool file_existence_tester (const std::string& name) {
-  struct stat buffer;
-  return (stat (name.c_str(), &buffer) == 0);
-}
+//checks if file exists
+bool file_existence_tester (const std::string& name);
+//executes command and captures STDOUT
+void execToBuf(string command, char* buf, int buflen);
 
-//from https://stackoverflow.com/questions/125828/capturing-stdout-from-a-system-command-optimally
-void execToBuf(string command, char* buf, int buflen) {
-  FILE* file=popen(command.c_str(),"r");
-  if(!file) {
-    return;
-  }
-  //fgets(buf,buflen,file);
-  //fread can read more than 1 line
-  fread(buf,buflen,1,file);
-  pclose(file);
-}
 //config.pidfile may change at runtime, so we have to save these settings somewhere
 bool haveICreatedPidFile=false;
 string createdPidFileName="";
@@ -218,4 +206,20 @@ int main() {
   udp.cleanup();
   if(haveICreatedPidFile)
     unlink(createdPidFileName.c_str());
+}
+//from https://stackoverflow.com/questions/12774207/fastest-way-to-check-if-a-file-exist-using-standard-c-c11-c
+bool file_existence_tester (const std::string& name) {
+  struct stat buffer;
+  return (stat (name.c_str(), &buffer) == 0);
+}
+//from https://stackoverflow.com/questions/125828/capturing-stdout-from-a-system-command-optimally
+void execToBuf(string command, char* buf, int buflen) {
+  FILE* file=popen(command.c_str(),"r");
+  if(!file) {
+    return;
+  }
+  //fgets(buf,buflen,file);
+  //fread can read more than 1 line
+  fread(buf,buflen,1,file);
+  pclose(file);
 }
