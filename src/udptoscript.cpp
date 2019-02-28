@@ -80,7 +80,7 @@ void my_signal_handler(int signum)
     exit(0);
   }
   if(signum == SIGINT) {
-    cout<<"received SIGTERM, exiting gracefully"<<endl;
+    cout<<"received SIGINT, exiting gracefully"<<endl;
     socket.unbind();
     exit(0);
   }
