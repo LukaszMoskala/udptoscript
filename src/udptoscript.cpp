@@ -92,7 +92,7 @@ int main() {
 
   while( 1 ) {
     socket.receive(buffer, sizeof(buffer), received, sender, port);
-    cout<<"Received "<<received<<" from "<<sender.toString()<<":"<<port<<endl;
+    //cout<<"Received "<<received<<" from "<<sender.toString()<<":"<<port<<endl;
     bool allowed=false;
     for(int i=0;i<config.globalAllowedIPS.size() && !allowed;i++) {
       allowed= ( config.globalAllowedIPS[i] == sender.toString() );
@@ -110,9 +110,11 @@ int main() {
                        buffer[i] == '.');
     }
 
-    if(!possiblygood)
+    if(!possiblygood) {
+      cout<<"Data contains invalid characters"<<endl;
       continue;
-    cout<<"Data is valid, continue"<<endl;
+    }
+    //cout<<"Data is valid, continue"<<endl;
     s=string(buffer, received);
     if(s == config.stopcommand) {
       cout<<"Received stop command, exiting now"<<endl;
@@ -120,7 +122,7 @@ int main() {
     }
 
     s=config.scriptsDir+"/"+s;
-    cout<<s<<endl;
+    cout<<"EXECUTING : "<<s<<endl;
     if(file_existence_tester(s)) {
       memset(buffer,0,sizeof(buffer));
       execToBuf(s,buffer,sizeof(buffer)-1);
@@ -130,6 +132,7 @@ int main() {
     else {
       cout<<"Error: file does not exist!"<<endl;
     }
+    cout<<"EXECUTION COMPLETED"<<endl;
 
 
   }
