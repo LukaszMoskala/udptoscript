@@ -176,7 +176,8 @@ int main() {
     if(file_existence_tester(s)) {
       memset(buffer,0,sizeof(buffer));
       execToBuf(s,buffer,sizeof(buffer)-1);
-      socket.send(buffer,strlen(buffer),sender,port);
+      if(config.OutputSendRules == always)
+        socket.send(buffer,strlen(buffer),sender,port);
     }
     else {
       cout<<"Error: file does not exist!"<<endl;
