@@ -21,10 +21,15 @@ private:
   struct sockaddr_in serv,client;
   socklen_t l;
 public:
+  //Create socket and bind
   int begin(uint16_t port);
+  //Read from socket
   int read(char *buf, int buflen);
+  //respond to last client
   int respond(char* buf, int buflen);
+  //get last client IP
   const char* getClientIP();
+  //unbind socket
   void cleanup();
 };
 
