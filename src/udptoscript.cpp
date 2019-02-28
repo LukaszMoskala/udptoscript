@@ -56,14 +56,22 @@ void execToBuf(string command, char* buf, int buflen) {
   fread(buf,buflen,1,file);
   pclose(file);
 }
+sf::UdpSocket socket;
+
 //from https://stackoverflow.com/questions/6168636/how-to-trigger-sigusr1-and-sigusr2
 void my_signal_handler(int signum)
 {
     if (signum == SIGUSR1)
     {
         cout<<"received SIGUSR1, reloading config"<<endl;
-        if(loadconfig(config)) exit(1);
-        if(verifyconfig(config)) exit(1);
+        if(loadconfig(config)) {
+          socket.unbind();
+          exit(1);
+        }
+        if(verifyconfig(config)) {
+          socket.unbind();
+          exit(1);
+        }
     }
 }
 int main() {
@@ -73,7 +81,6 @@ int main() {
 
   signal(SIGUSR1, my_signal_handler);
 
-  sf::UdpSocket socket;
   socket.bind(config.port);
 
   char buffer[1024];
@@ -125,4 +132,5 @@ int main() {
 
 
   }
+  socket.unbind();
 }
