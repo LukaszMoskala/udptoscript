@@ -20,23 +20,12 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #include <sys/types.h>
 #include <cstring>
 #include <signal.h>
+//configuration structure
 config_t config;
-
 //Input and output buffer
 char buffer[1024];
-
-
-//TODO:
-// - configuration file
-//   - change port                                                 | DONE
-//   - change stop command or disable it                           | DONE
-//   - IP-based restriction                                        | PARTIALLY DONE
-//     - global (in config file)                                   | DONE
-//     - per script (comments in scripts)
-//   - script directory location                                   | DONE
-//   - rules for sending script output back                        | DONE
-//     - Never/Always/On success/On failure/Send only return code  | PARTIALLY DONE, CANCELLED
-// - MAKE CODE MORE READABLE!!!!!
+//Udp server instance
+UdpServer udp;
 
 //from https://stackoverflow.com/questions/12774207/fastest-way-to-check-if-a-file-exist-using-standard-c-c11-c
 bool file_existence_tester (const std::string& name) {
@@ -55,7 +44,6 @@ void execToBuf(string command, char* buf, int buflen) {
   fread(buf,buflen,1,file);
   pclose(file);
 }
-UdpServer udp;
 
 //from https://stackoverflow.com/questions/6168636/how-to-trigger-sigusr1-and-sigusr2
 void my_signal_handler(int signum)
@@ -88,32 +76,63 @@ void my_signal_handler(int signum)
   }
 }
 int main() {
+  //load configuration
+  if(loadconfig(config))
+    return 1;
+  //and verify it
+  if(verifyconfig(config))
+    return 1;
+  //two functions above returns 1 on critical failure
+  //and then we exit. Config library prints error messages
+  //on it's own
 
-  if(loadconfig(config)) return 1;
-  if(verifyconfig(config)) return 1;
-
+  //handle signals
   signal(SIGUSR1, my_signal_handler);
   signal(SIGTERM, my_signal_handler);
   signal(SIGINT, my_signal_handler);
-  //library itself generates error messages
+
+  //Initialize network connectivity
+  //this function takes only port number as argument
+  //in case of failure, it generates error message to stdout
+  //and returns non-zero exit code
   if(udp.begin(config.port))
     return 1;
 
+  //infinite loop that handles server
+  //only one script can be executed at a time
+  //however, you can run multiple daemons (on diffrent ports, of course)
+  //to overcome that limitation
   while( 1 ) {
+    //zero out buffer to avoid using command from previous client
+    //prabably doesn't matter anyway, but it's good practise
     memset(buffer, 0, sizeof(buffer));
+    //read data from client.
+    //only up to SIZEOF(BUF) bytes can be read, and at this moment is's size is
+    //1024 bytes. however, standard ehternet connection has MTU of about 1500
+    //and any packet can't exceed that, so that's upper limit anyway
+    //but you shouldn't have script names THAT long ;)
+    //in any case, symlinks are your friends
     int received=udp.read(buffer, sizeof(buffer));
+    //if length is 0 or error has occured, skip that packet
+    //error message is already printed by udp.read
     if(received < 1)
       continue;
+    //this variable means that IP that tries to connect is on allowed list
     bool allowed=false;
+    //and that's checked here
     for(int i=0;i<config.globalAllowedIPS.size() && !allowed;i++) {
       allowed= ( config.globalAllowedIPS[i] == udp.getClientIP() );
     }
     if(!allowed) {
+      //if we'r here, IP is not allowed
+      //todo: send error message to client?
       cout<<"IP "<<udp.getClientIP()<<" not in allowed list"<<endl;
       continue;
     }
     bool possiblygood=true;
-
+    //verifies if message contains only letters and numbers, or dot
+    //that's for safety, so user can't do '../../../../../bin/ls'
+    //or something like that
     for(int i=0;i<received && possiblygood;i++) {
       possiblygood=( ( buffer[i] >= '0' && buffer[i] <= '9' ) ||
                      ( buffer[i] >= 'a' && buffer[i] <= 'z' ) ||
@@ -122,11 +141,13 @@ int main() {
     }
 
     if(!possiblygood) {
+      //todo: send error message to client?
       cout<<"Data contains invalid characters"<<endl;
       continue;
     }
     string s=string(buffer, received);
     if(s == config.stopcommand) {
+      //todo: notifiy client about success?
       cout<<"Received stop command, exiting now"<<endl;
       break;
     }
@@ -134,12 +155,20 @@ int main() {
     s=config.scriptsDir+"/"+s;
     cout<<"EXECUTING : "<<s<<endl;
     if(file_existence_tester(s)) {
+      //clear buffer before sending output back
+      //output is limited to sizeof(buffer)-1
+      //it shouldn't be really a problem
+      //also, output is expected to be text, not binary, as NULL is used to
+      //locate end of string
       memset(buffer,0,sizeof(buffer));
+      //execute and get output
       execToBuf(s,buffer,sizeof(buffer)-1);
+      //if we should send output back, do it
       if(config.OutputSendRules == always)
         udp.respond(buffer, strlen(buffer));
     }
     else {
+      //todo: send error message to client?
       cout<<"Error: file does not exist!"<<endl;
     }
     cout<<"EXECUTION COMPLETED"<<endl;
