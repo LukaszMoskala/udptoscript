@@ -38,6 +38,8 @@ int loadconfig(config_t &config) {
     #endif
     if(param == "port")
       config.port = atoi( val.c_str() );
+    if(param == "listenip")
+      config.listenIP = val;
     if(param == "allow")
       config.globalAllowedIPS.push_back(val);
     if(param == "stopcommand")
@@ -91,6 +93,10 @@ int verifyconfig(config_t &config) {
     config.stopcommand = "stopdaemon";
     cout<<"WARNING: no stopcommand directive in config, using 'stopdaemon'"<<endl;
   }
+  if(config.listenIP == "") {
+    config.listenIP = "0.0.0.0";
+    cout<<"WARNING: listenIP was empty, so I changed it to 0.0.0.0"<<endl;
+  }
   return 0; //no errors
 }
 void destroyconfig(config_t &config) {
@@ -99,5 +105,6 @@ void destroyconfig(config_t &config) {
   config.scriptsDir="";
   config.OutputSendRules=never;
   config.errorMessages=never;
+  config.listenIP="0.0.0.0";
   config.globalAllowedIPS.clear();
 }

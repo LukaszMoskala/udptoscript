@@ -31,6 +31,7 @@ struct config_t {
   string scriptsDir;
   OutputSendRules_t OutputSendRules;
   OutputSendRules_t errorMessages;
+  string listenIP;
 };
 
 int loadconfig(config_t &config);

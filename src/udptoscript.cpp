@@ -92,10 +92,10 @@ int main() {
   signal(SIGINT, my_signal_handler);
 
   //Initialize network connectivity
-  //this function takes only port number as argument
+  //this function takes only port number and ip to listen at as argument
   //in case of failure, it generates error message to stdout
   //and returns non-zero exit code
-  if(udp.begin(config.port))
+  if(udp.begin(config.port, config.listenIP))
     return 1;
 
   //infinite loop that handles server

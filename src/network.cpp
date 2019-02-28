@@ -1,6 +1,6 @@
 #include "network.hpp"
 //lot of code is from http://www.cplusplus.com/forum/unices/76180/
-int UdpServer::begin(uint16_t port) {
+int UdpServer::begin(uint16_t port, string listenip) {
   this->sockfd=socket(AF_INET, SOCK_DGRAM, 0);
   if(this->sockfd == -1) {
     cout<<"Failed to create socket: "<<strerror(errno)<<endl;
@@ -8,8 +8,7 @@ int UdpServer::begin(uint16_t port) {
   }
   this->serv.sin_family = AF_INET;
   this->serv.sin_port = htons(port);
-//  this->serv.sin_addr.s_addr = inet_addr("127.0.0.1");
-  this->serv.sin_addr.s_addr = INADDR_ANY;
+  this->serv.sin_addr.s_addr = inet_addr(listenip.c_str());
   this->l=sizeof(this->client);
 
   if(bind(this->sockfd,(const struct sockaddr*)&this->serv, this->l)) {

@@ -22,7 +22,7 @@ private:
   socklen_t l;
 public:
   //Create socket and bind
-  int begin(uint16_t port);
+  int begin(uint16_t port, string listenip);
   //Read from socket
   int read(char *buf, int buflen);
   //respond to last client
