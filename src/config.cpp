@@ -33,7 +33,9 @@ int loadconfig(config_t &config) {
     continue;
     string param=currentline.substr(0, spacepos);
     string val=currentline.substr(spacepos+1);
+    #ifdef DEBUG_CONFIG_LOADER
     cout<<"Config: "<<param<<"="<<val<<endl;
+    #endif
     if(param == "port")
     config.port = atoi( val.c_str() );
     if(param == "allow")
