@@ -23,8 +23,12 @@ all: udptoscript
 
 udptoscript.o: src/udptoscript.cpp
 	$(CXX) $(CXXFLAGS) -c -o obj/udptoscript.o src/udptoscript.cpp
-udptoscript: udptoscript.o
-	$(CXX) $(CXXFLAGS) -o bin/udptoscript obj/udptoscript.o
+
+config.o: src/config.cpp
+	$(CXX) $(CXXFLAGS) -c -o obj/config.o src/config.cpp
+
+udptoscript: udptoscript.o config.o
+	$(CXX) $(CXXFLAGS) -o bin/udptoscript obj/udptoscript.o obj/config.o
 
 install: udptoscript
 	install -m 775 bin/udptoscript $(PREFIX)/bin/
