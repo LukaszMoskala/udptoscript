@@ -35,3 +35,5 @@ install-service:
 	@echo = YOU SHOULD EDIT /etc/systemd/system/udptoscript.service =
 	@echo =       AND CHANGE USER AS WHICH DAEMON IS RUNNING        =
 	@echo ===========================================================
+clean:
+	rm -f obj/*.o
