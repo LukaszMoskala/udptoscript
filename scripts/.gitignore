@@ -1,1 +1,3 @@
 *.sh
+!test.sh
+!long.sh
