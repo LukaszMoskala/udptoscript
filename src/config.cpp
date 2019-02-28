@@ -71,6 +71,7 @@ int verifyconfig(config_t &config) {
   }
   if( config.scriptsDir[ config.scriptsDir.length() - 1 ] == '/' ) {
     config.scriptsDir = config.scriptsDir.substr(0, config.scriptsDir.length() - 1 ); //strip / from end of path
+    cout<<"WARINING: stripped / from end of scriptsDir path! avoid that next time"<<endl;
   }
   if(config.globalAllowedIPS.size() == 0) {
     cout<<"Warning: no allowed IPs specified, nobody will be able to connect!"<<endl;
