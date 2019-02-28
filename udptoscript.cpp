@@ -60,7 +60,9 @@ void execToBuf(string command, char* buf, int buflen) {
   if(!file) {
     return;
   }
-  fgets(buf,buflen,file);
+  //fgets(buf,buflen,file);
+  //fread can read more than 1 line
+  fread(buf,buflen,1,file);
   pclose(file);
 }
 
