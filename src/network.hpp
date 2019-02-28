@@ -1,3 +1,10 @@
+/*
+  WARNING: THIS LIBRARY WORKS ONLY FOR THIS PROGRAM!
+  it has next to nothing functionality, doesn't support multiple clients
+  and many more limitations!
+
+  packets can be sent only as responses to client that already sent packet
+*/
 #ifndef NETWORK_HPP
 #define NETWORK_HPP 1
 #include<arpa/inet.h>
