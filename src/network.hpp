@@ -7,13 +7,13 @@
 */
 #ifndef NETWORK_HPP
 #define NETWORK_HPP 1
-#include<arpa/inet.h>
-#include<unistd.h>
-#include<sys/socket.h>
-#include<sys/types.h>
-#include<iostream>
-#include<cstdio>
-#include<cstring>
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <iostream>
+#include <cstdio>
+#include <cstring>
 using namespace std;
 class UdpServer {
 private:
