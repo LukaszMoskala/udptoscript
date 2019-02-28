@@ -93,7 +93,6 @@ int main() {
   signal(SIGINT, my_signal_handler);
   if(udp.begin(config.port))
     return 1;
-  cout<<"Networking ready"<<endl;
   char buffer[1024];
   int received = 0;
   string s="";
